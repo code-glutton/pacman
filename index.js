@@ -4,6 +4,13 @@ import GameBoard from './GameBoard';
 import Pacman from './Pacman';
 import Ghost from './Ghost';
 
+//sound
+import soundDot from './sounds/munch.wav';
+import soundPill from './sounds/pill.wav';
+import soundGameStart from './sounds/game_start.wav';
+import soundGameOver from './sounds/death.wav';
+import soundGhost from './sounds/eat_ghost.wav';
+
 //DOM Elements
 const gameGrid = document.querySelector('#game');
 const scoreTable = document.querySelector('#score');
@@ -21,7 +28,13 @@ let gameWin = false;
 let powerPillActive = false;
 let powerPillTimer = null;
 
+function playAudio(audio){
+    const soundEffect = new Audio(audio);
+    soundEffect.play()
+}
+
 function gameOver(pacman,grid){
+    playAudio(soundGameOver);
     document.removeEventListener('keydown',e=> pacman.handleKeyInput(e,gameboard.objectExist));
     gameBoard.showGameStatus(gameWin);
     clearInterval(timer);
@@ -32,6 +45,7 @@ function checkCollision(pacman,ghosts){
 
     if(collidedGhost){
         if(pacman.powerPill){
+            playAudio(soundGhost);
             gameBoard.removeObject(collidedGhost.pos,[
                 OBJECT_TYPE.GHOST,OBJECT_TYPE.SCARED,collidedGhost.name
             ])
@@ -52,6 +66,7 @@ function gameLoop(pacman,ghosts){
 
     //check if pacman eats a dot
     if(gameBoard.objectExist(pacman.pos,OBJECT_TYPE.DOT)){
+        playAudio(soundDot);
         gameBoard.removeObject(pacman.pos, [OBJECT_TYPE.DOT]);
         gameBoard.dotCOunt--;
         score += 10;
@@ -59,6 +74,7 @@ function gameLoop(pacman,ghosts){
 
     //check if pacman eats a powerPill
     if(gameBoard.objectExist(pacman.pos,OBJECT_TYPE.PILL)){
+        playAudio(soundPill);
         gameBoard.removeObject(pacman.pos, [OBJECT_TYPE.PILL]);
         pacman.powerPill = true;
         score += 50;
@@ -84,8 +100,10 @@ function gameLoop(pacman,ghosts){
     
 }
 function startGame(){
+    playAudio(soundGameStart);
     gameWin = false;
-    (powerPillActive = false),(score = 0);
+    powerPillActive = false;
+    score = 0;
 
     startButton.classList.add('hide');
 
