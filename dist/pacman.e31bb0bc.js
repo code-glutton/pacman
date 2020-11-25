@@ -360,7 +360,7 @@ var GameBoard = /*#__PURE__*/function () {
 
         _this2.grid.push(div);
 
-        if (_setup.CLASS_LIST[square] === _setup.OBJECT_TYPE.DOT) _this2.dotCount++;
+        if (_setup.CLASS_LIST[square] === _setup.OBJECT_TYPE.DOT) _this2.dotCOunt++;
       });
     }
   }, {
@@ -640,7 +640,7 @@ function checkCollision(pacman, ghosts) {
   if (collidedGhost) {
     if (pacman.powerPill) {
       gameBoard.removeObject(collidedGhost.pos, [_setup.OBJECT_TYPE.GHOST, _setup.OBJECT_TYPE.SCARED, collidedGhost.name]);
-      collidedGhost.pos = collided.startPos;
+      collidedGhost.pos = collidedGhost.startPos;
       score += 100;
     } else {
       gameBoard.removeObject(pacman.pos, [_setup.OBJECT_TYPE.PACMAN]);
@@ -656,7 +656,39 @@ function gameLoop(pacman, ghosts) {
   ghosts.forEach(function (ghost) {
     return gameBoard.moveCharacter(ghost);
   });
-  checkCollision(pacman, ghosts);
+  checkCollision(pacman, ghosts); //check if pacman eats a dot
+
+  if (gameBoard.objectExist(pacman.pos, _setup.OBJECT_TYPE.DOT)) {
+    gameBoard.removeObject(pacman.pos, [_setup.OBJECT_TYPE.DOT]);
+    gameBoard.dotCOunt--;
+    score += 10;
+  } //check if pacman eats a powerPill
+
+
+  if (gameBoard.objectExist(pacman.pos, _setup.OBJECT_TYPE.PILL)) {
+    gameBoard.removeObject(pacman.pos, [_setup.OBJECT_TYPE.PILL]);
+    pacman.powerPill = true;
+    score += 50;
+    clearTimeout(powerPillTimer);
+    powerPillTimer = setTimeout(function () {
+      return pacman.powerPill = false;
+    }, POWER_PILL_TIME);
+  }
+
+  if (pacman.powerPill !== powerPillActive) {
+    powerPillActive = pacman.powerPill;
+    ghosts.forEach(function (ghost) {
+      return ghost.isScared = pacman.powerPill;
+    });
+  } //check if all dots have been eaten
+
+
+  if (gameBoard.dotCOunt === 0) {
+    gameWin = true;
+    gameOver(pacman, ghosts);
+  }
+
+  scoreTable.innerHTML = score;
 }
 
 function startGame() {
