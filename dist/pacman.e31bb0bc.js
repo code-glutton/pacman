@@ -355,6 +355,28 @@ var GameBoard = /*#__PURE__*/function () {
     value: function rotateDiv(pos, deg) {
       this.grid[pos].style.transform = "rotate(".concat(deg, "deg)");
     }
+  }, {
+    key: "moveCharacter",
+    value: function moveCharacter(character) {
+      if (character.shouldMove()) {
+        var _character$getNextMov = character.getNextMove(this.objectExist),
+            nextMovePos = _character$getNextMov.nextMovePos,
+            direction = _character$getNextMov.direction;
+
+        var _character$makeMove = character.makeMove(),
+            classesToRemove = _character$makeMove.classesToRemove,
+            classesToAdd = _character$makeMove.classesToAdd;
+
+        if (character.rotation && nextMovePos !== character.pos) {
+          this.rotateDiv(nextMovePos, character.dir.rotation);
+          this.rotateDiv(character.pos, 0);
+        }
+
+        this.removeObject(character.pos, classesToRemove);
+        this.addObject(nextMovePos, classesToAdd);
+        character.setNewPos(nextMovePos, direction);
+      }
+    }
   }], [{
     key: "createGameBoard",
     value: function createGameBoard(DOMGrid, level) {
@@ -412,10 +434,10 @@ var Pacman = /*#__PURE__*/function () {
   }, {
     key: "getNextMove",
     value: function getNextMove(objectExist) {
-      var nextMovPos = this.pos + this.dir.movement;
+      var nextMovePos = this.pos + this.dir.movement;
 
-      if (objectExist(nextMovPos, _setup.OBJECT_TYPE.WALL) || objectExist(nextMovPos, _setup.OBJECT_TYPE.GHOSTLAIR)) {
-        nextMovPos = this.pos;
+      if (objectExist(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExist(nextMovePos, _setup.OBJECT_TYPE.GHOSTLAIR)) {
+        nextMovePos = this.pos;
       }
 
       return {
@@ -450,7 +472,7 @@ var Pacman = /*#__PURE__*/function () {
       }
 
       var nextMovePos = this.pos + dir.movement;
-      if (objectExist(nextMovePos, _setup.OBJECT_TYPE.WALL)) return;
+      if (objectExist(nextMovePos, _setup.OBJECT_TYPE.WALL) || objectExist(nextMovePos, _setup.OBJECT_TYPE.GHOSTLAIR)) return;
       this.dir = dir;
     }
   }]);
@@ -492,12 +514,13 @@ function gameOver(pacman, grid) {}
 
 function checkPosition(pacman, ghosts) {}
 
-function gameLoop(pacman, ghosts) {}
+function gameLoop(pacman, ghosts) {
+  gameBoard.moveCharacter(pacman);
+}
 
 function startGame() {
   gameWin = false;
-  powerPillActive = false;
-  score = 0;
+  powerPillActive = false, score = 0;
   startButton.classList.add('hide');
   gameBoard.createGrid(_setup.LEVEL);
   var pacman = new _Pacman.default(2, 287);
@@ -505,6 +528,9 @@ function startGame() {
   document.addEventListener('keydown', function (e) {
     return pacman.handleKeyInput(e, gameBoard.objectExist);
   });
+  timer = setInterval(function () {
+    return gameLoop(pacman);
+  }, GLOBAL_SPEED);
 } //Initialise game
 
 

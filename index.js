@@ -22,11 +22,12 @@ let powerPillTimer = null;
 
 function gameOver(pacman,grid){}
 function checkPosition(pacman,ghosts){}
-function gameLoop(pacman,ghosts){}
+function gameLoop(pacman,ghosts){
+    gameBoard.moveCharacter(pacman);
+}
 function startGame(){
     gameWin = false;
-    powerPillActive = false;
-    score = 0;
+    (powerPillActive = false),(score = 0);
 
     startButton.classList.add('hide');
 
@@ -36,6 +37,8 @@ function startGame(){
     document.addEventListener('keydown' , (e)=> 
         pacman.handleKeyInput(e,gameBoard.objectExist)
     )
+
+    timer = setInterval(() => gameLoop(pacman),GLOBAL_SPEED);
 }
 
 //Initialise game
